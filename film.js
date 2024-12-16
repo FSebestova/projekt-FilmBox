@@ -103,4 +103,102 @@ const filmy = [
 			'Na zámek v podhůří Krkonoš přijíždí jeho nový majitel Štěpán se svojí snoubenkou, krásnou komtesou Blankou, a mladším bratrem Adamem. Cestou kočár nešťastně srazí kolemjdoucí dívku, Adam jí pomůže a ona se do něj zamiluje. Na zámku Adam objeví starou vlašskou knihu, která by měla obsahovat cestu k pokladům. Tajemné značky vlašské knihy však nedokáže vyluštit ani národopisec Jiráček, který v kraji sbírá pověsti a nevychází z údivu nad tím, že zdejší lidé stále věří v Krakonoše. Na zámku se objeví záhadný cizinec a nabídne Štěpánovi, že jej k pokladu za určitých podmínek dovede. Výprava do hor může začít. Naplní se Liduščina láska k Adamovi? Jakou záhadu skrývá starý obraz na zámku Hůrka a co strašlivého se v horách kdysi odehrálo? A kdo je vlastně Krakonoš a jaké je jeho největší tajemství? (csfd.cz, Česká televize)',
 		premiera: '2022-12-24',
 	},
+    {
+		id: 'smrtonosna-past',
+		nazev: 'Smrtonosná past',
+		plakat: {
+			url: 'https://image.pmgstatic.com/cache/resized/w420/files/images/film/posters/000/006/6003_d3e249.jpg',
+			sirka: 420,
+			vyska: 592,
+		},
+		ochutnavka: 'Vánoční pohádka s trochou akce',
+		popis:
+			'Policista John McClane přilétá na Vánoce do Los Angeles za svou manželkou Holly a dětmi. Holly pracuje pro japonskou společnost Nakatomi, v jejímž mrakodrapu se právě koná vánoční večírek. Holly odešla z New Yorku za prací, zatímco John tam zůstal. Nyní zjišťuje, že Holly používá v práci své jméno za svobodna. Jde se do koupelny upravit a mezitím do budovy přijíždějí ozbrojení muži. Zabijí strážce, uzamknou výtahy, všechny vchody a odpojí telefony. Potom proniknou na večírek a John z koupelny zaslechne střelbu. Podaří se mu nepozorovaně utéct do vyššího patra, kam později útočníci odvedou ředitele společnosti Nakatomi. Chtějí po něm přístupové heslo k počítači, který mimo jiné řídí trezor, ze kterého chtějí ukrást dluhopisy v hodnotě stovek milionů... Ředitel se jim snaží vysvětlit, že trezor má sedm zámků a on zná kód pouze k jednomu – a i ten jim odmítne dát. Hans, vůdce útočníků, ho zastřelí. John spustí požární alarm, aby přivolal pomoc, ale útočníci zavolají hasičům, že poplach je falešný. Díky tomu ale zjistili, že je někdo v horním patře, a pošlou tam muže se zbraní... John teroristu zabije, sebere mu zbraň a vysílačku a jeho tělo pošle dolů výtahem. Bratr zavražděného, Karl, chce Johna ihned najít a pomstít se. John použije ukradenou vysílačku a snaží se přivolat pomoc, ale jeho volání slyší i teroristé a dojde jim, že John bude někde na střeše. Volání zachytí i policie, ale nevěří Johnovi, že se něco děje. Když pak ale ve vysílačce zaslechnou střelbu, pošlou tam na kontrolu hlídku. Seržant Powell dojede do Nakatomi, promluví si se strážným, což je ale nastrčený terorista, a v klidu odjíždí s tím, že nic podezřelého nenašel. Když ho John vidí odjíždět, vyhodí z okna mrtvolu dalšího teroristy, kterého při přestřelce zabil, a začne z okna střílet... (TV Prima)',
+		premiera: '1988-08-22',
+	},
 ]
+document.addEventListener('DOMContentLoaded', function () {
+    const detailContainer = document.getElementById('detail-filmu');
+    const nazevFilmu = decodeURIComponent(window.location.hash.substring(1));
+    const filmData = filmy.find(film => film.nazev === nazevFilmu);
+
+    if (filmData) {
+        const formattedDate = dayjs(filmData.premiera).format('D. M. YYYY');
+        const premiereDate = dayjs(filmData.premiera);
+        const currentDate = dayjs();
+        const daysDifference = Math.ceil((premiereDate - currentDate) / (1000 * 60 * 60 * 24));
+
+        const sklonujDen = (days) => {
+            if (days === 1 || days % 10 === 1) return 'den';
+            if (days > 1 && days < 5 || (days % 10 >= 2 && days % 10 <= 4)) return 'dny';
+            return 'dní';
+        };
+
+        let premiereInfo = daysDifference > 0
+            ? `Premiéra <strong>${formattedDate}</strong>, což je za ${daysDifference} ${sklonujDen(daysDifference)}.`
+            : daysDifference < 0
+                ? `Premiéra <strong>${formattedDate}</strong>, což bylo před ${Math.abs(daysDifference)} ${sklonujDen(Math.abs(daysDifference))}.`
+                : `Premiéra <strong>${formattedDate}</strong>, dnes!`;
+
+        detailContainer.innerHTML = `
+            <h2>${filmData.nazev}</h2>
+            <img src="${filmData.plakat.url}" alt="${filmData.nazev}" width="${filmData.plakat.sirka}" height="${filmData.plakat.vyska}" />
+            <p><strong>Ochutnávka:</strong> ${filmData.ochutnavka}</p>
+            <p><strong>Popis:</strong> ${filmData.popis}</p>
+            <p><strong>${premiereInfo}</strong></p>
+            <div class="card-body" id="note-container">
+                <form id="note-form">
+                    <label for="message-input">Poznámka:</label>
+                    <textarea id="message-input" class="form-control"></textarea>
+                    <div class="form-check">
+                        <input type="checkbox" id="terms-checkbox" class="form-check-input">
+                        <label for="terms-checkbox">Souhlasím s podmínkami</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Odeslat</button>
+                </form>
+            </div>
+        `;
+
+        const form = document.querySelector('#note-form');
+        const messageInput = document.querySelector('#message-input');
+        const termsCheckbox = document.querySelector('#terms-checkbox');
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            let isValid = true;
+
+            // Validace textového pole
+            if (messageInput.value.trim() === '') {
+                messageInput.classList.add('is-invalid');
+                messageInput.focus();  // Zaměření na textové pole
+                isValid = false;
+            } else {
+                messageInput.classList.remove('is-invalid');
+            }
+
+            // Validace zaškrtnutí checkboxu
+            if (!termsCheckbox.checked) {
+                termsCheckbox.classList.add('is-invalid');
+                if (isValid) termsCheckbox.focus();  // Zaměření na checkbox, pouze pokud ještě nebylo zaměřeno pole
+                isValid = false;
+            } else {
+                termsCheckbox.classList.remove('is-invalid');
+            }
+
+            // Pokud je validace úspěšná
+            if (isValid) {
+                const noteText = messageInput.value.trim();
+                const noteParagraph = document.createElement("p");
+                noteParagraph.classList.add("card-text");
+                noteParagraph.textContent = `Vaše poznámka: ${noteText}`;
+                detailContainer.appendChild(noteParagraph);
+
+                // Vymazání vstupů formuláře
+                form.reset();
+            }
+        });
+    } else {
+        detailContainer.innerHTML = `<p>Film nebyl nalezen. Zkontrolujte adresu URL.</p>`;
+    }
+});
